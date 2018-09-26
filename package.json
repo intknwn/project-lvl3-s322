@@ -24,7 +24,11 @@
     "prepublishOnly": "npm run build"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/__fixtures__"
+    ]
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -49,6 +53,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
     "commander": "^2.15.1",
     "mz": "^2.7.0",
     "nock": "^9.4.0"
