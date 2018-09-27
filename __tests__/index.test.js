@@ -34,14 +34,16 @@ describe('page-loader', () => {
       .get('/courses/img/hexlet.jpg')
       .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/img/hexlet.jpg`)
       .get('/courses/js/main.js')
-      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/js/main.js`);
+      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/js/main.js`)
+      .get('/wrong')
+      .reply(404);
   });
 
   it('non-existent page', async () => {
     try {
       await loadPage(wrongUrl, output);
     } catch (err) {
-      expect(err.status).toBe(404);
+      expect(err.code).toBe(404);
     }
   });
 

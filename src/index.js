@@ -45,6 +45,12 @@ const parseHtml = (data, address) => {
 const getResource = (address, resUrl, output) => {
   const filePath = path.join(output, makePath(resUrl || address));
   return axios.get(address, { responseType: 'arraybuffer' })
+    .catch((err) => {
+      console.error(`HTML ${err.response.status}. Resource '${address}' can not be found.`);
+      const newErr = new Error();
+      newErr.code = err.response.status;
+      throw newErr;
+    })
     .then(res => fs.writeFile(filePath, res.data, 'utf8'))
     .then(() => {
       console.log(`Resource successfully downloaded: ${filePath}`);
