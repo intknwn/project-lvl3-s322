@@ -42,8 +42,8 @@ const parseHtml = (data, address) => {
   return { urls, newHtml: $.html() };
 };
 
-const getResource = (address, output) => {
-  const filePath = path.join(output, makePath(address));
+const getResource = (address, resUrl, output) => {
+  const filePath = path.join(output, makePath(resUrl || address));
   return axios.get(address, { responseType: 'arraybuffer' })
     .then(res => fs.writeFile(filePath, res.data, 'utf8'))
     .then(() => {
@@ -65,7 +65,7 @@ export default (address, output) => {
   const resFilesPath = path.join(output, makePath(address, '_files'));
   let parsedData;
 
-  return getResource(address, outputDir)
+  return getResource(address, '', outputDir)
     .then(() => fs.readFile(filePath, 'utf8'))
     .then(data => parseHtml(data, address))
     .then((parsedObj) => {
@@ -73,6 +73,6 @@ export default (address, output) => {
       return fs.writeFile(filePath, parsedObj.newHtml);
     })
     .then(() => fs.mkdir(resFilesPath))
-    .then(() => Promise.all(parsedData.urls.map(urlStr => getResource(`${address}/${urlStr}`, resFilesPath))))
+    .then(() => Promise.all(parsedData.urls.map(urlStr => getResource(`${address}/${urlStr}`, urlStr, resFilesPath))))
     .then(() => fileName);
 };
