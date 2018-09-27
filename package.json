@@ -1,6 +1,6 @@
 {
   "name": "page-loader-by-intknwn",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Utility for downloading web pages to the specified directory.",
   "main": "dist/index.js",
   "author": "Dmitriy Nekludov",
