@@ -1,7 +1,7 @@
 install: install-deps install-flow-typed
 
 run:
-	npx babel-node -- src/bin/page-loader.js --output /var/tmp https://hexlet.io/courses
+	npx babel-node -- src/bin/page-loader.js --output /var/tmp/mam3 http://might-and-magic.com
 
 install-deps:
 	npm install
