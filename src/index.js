@@ -4,23 +4,17 @@ import path from 'path';
 import cheerio from 'cheerio';
 import axios from './lib/axios';
 
-const makePath = (address, ext = '') => {
-  const { host, pathname } = url.parse(address);
-  const fileExt = !pathname ? '' : path.extname(pathname);
-  const newHost = !host ? '' : host.replace(/[^a-z0-9]/gi, '-');
-  const newPath = !pathname ? '' : pathname
-    .slice(0, fileExt ? -fileExt.length : pathname.length)
-    .split('/')
-    .filter(x => x)
-    .join('-');
-
-  const sep = newHost ? '-' : '';
-
-  return `${newHost}${sep}${newPath}${ext || fileExt || '.html'}`;
+const makePath = (address, fileExt = '') => {
+  const addr = address[0] === '/' ? address.slice(1) : address;
+  const { host, pathname } = url.parse(addr, true);
+  const { ext, dir, name } = path.parse([host, pathname].join(''));
+  const base = (path.join(dir, name)).replace(/[^a-z0-9]/gi, '-');
+  return `${base}${fileExt || ext || '.html'}`;
 };
 
 const parseHtml = (data, address) => {
   const $ = cheerio.load(data);
+  const resFilePath = makePath(address, '_files');
   const tags = [
     { name: 'link', attr: 'href' },
     { name: 'script', attr: 'src' },
@@ -36,7 +30,8 @@ const parseHtml = (data, address) => {
       const { host } = url.parse(urlStr);
       if (!host) {
         acc.push(urlStr);
-        const newUrl = `${makePath(address, '_files')}/${makePath(urlStr)}`;
+        const resFileName = makePath(urlStr);
+        const newUrl = `${resFilePath}/${resFileName}`;
         $(el).attr(tag.attr, newUrl);
       }
     });
@@ -67,7 +62,7 @@ export default (address, output) => {
   const outputDir = output;
   const fileName = makePath(address);
   const filePath = path.join(output, fileName);
-  const resFilePath = path.join(output, makePath(address, '_files'));
+  const resFilesPath = path.join(output, makePath(address, '_files'));
   let parsedData;
 
   return getResource(address, outputDir)
@@ -77,7 +72,7 @@ export default (address, output) => {
       parsedData = parsedObj;
       return fs.writeFile(filePath, parsedObj.newHtml);
     })
-    .then(() => fs.mkdir(resFilePath))
-    .then(() => Promise.all(parsedData.urls.map(urlStr => getResource(`${address}/${urlStr}`, resFilePath))))
+    .then(() => fs.mkdir(resFilesPath))
+    .then(() => Promise.all(parsedData.urls.map(urlStr => getResource(`${address}/${urlStr}`, resFilesPath))))
     .then(() => fileName);
 };

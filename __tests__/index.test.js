@@ -9,7 +9,10 @@ const tmpDir = `${os.tmpdir()}${path.sep}`;
 const pageUrl = `${host}/courses`;
 const wrongUrl = `${host}/wrong`;
 const filePath = `${__dirname}/__fixtures__/boilerplate/index.html`;
+const newFilePath = `${__dirname}/__fixtures__/boilerplate/index2.html`;
+
 const fileData = fs.readFileSync(filePath, 'utf8');
+const newFileData = fs.readFileSync(newFilePath, 'utf8');
 const resources = [
   'img-hexlet.jpg',
   'js-main.js',
@@ -24,16 +27,14 @@ describe('page-loader', () => {
     output = fs.mkdtempSync(tmpDir);
 
     nock.disableNetConnect();
+
     nock(host)
       .get('/courses')
-      .reply(200, fileData);
-    nock(host)
+      .reply(200, fileData)
       .get('/courses/css/main.css')
-      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/css/main.css`);
-    nock(host)
+      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/css/main.css`)
       .get('/courses/img/hexlet.jpg')
-      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/img/hexlet.jpg`);
-    nock(host)
+      .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/img/hexlet.jpg`)
       .get('/courses/js/main.js')
       .replyWithFile(200, `${__dirname}/__fixtures__/boilerplate/js/main.js`);
   });
@@ -77,6 +78,8 @@ describe('page-loader', () => {
       expect(fileName).toBe('hexlet-io-courses.html');
       const result1 = await fs.exists(path.resolve(output, fileName));
       expect(result1).toBe(true);
+      const data = await fs.readFile(path.resolve(output, fileName), 'utf8');
+      expect(data).toBe(newFileData);
       const result2 = await resources.map(item => fs.exists(path.resolve(output, 'hexlet-io-courses_files', item)));
       expect(result2).not.toContain(false);
       done();
