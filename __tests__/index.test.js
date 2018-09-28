@@ -2,7 +2,9 @@ import os from 'os';
 import fs from 'mz/fs';
 import nock from 'nock';
 import path from 'path';
+import { promises as fsp } from 'fs';
 import loadPage from '../src/';
+
 
 const host = 'http://hexlet.io';
 const tmpDir = `${os.tmpdir()}${path.sep}`;
@@ -22,8 +24,8 @@ describe('page-loader', () => {
   const fileData = fs.readFileSync(filePath, 'utf8');
   const newFileData = fs.readFileSync(newFilePath, 'utf8');
 
-  beforeEach(() => {
-    output = fs.mkdtempSync(tmpDir);
+  beforeEach(async () => {
+    output = await fsp.mkdtemp(tmpDir);
     nock.disableNetConnect();
 
     nock(host)

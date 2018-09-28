@@ -1,8 +1,13 @@
 import fs from 'mz/fs';
 import url from 'url';
 import path from 'path';
+import debug from 'debug';
 import cheerio from 'cheerio';
 import axios from './lib/axios';
+
+const loadLog = debug('page-loader:load');
+const parsedUrlsLog = debug('page-loader:parse');
+const newUrlsLog = debug('page-loader:makeurl');
 
 const makePath = (address, fileExt = '') => {
   const addr = address[0] === '/' ? address.slice(1) : address;
@@ -32,6 +37,7 @@ const parseHtml = (data, address) => {
         acc.push(urlStr);
         const resFileName = makePath(urlStr);
         const newUrl = `${resFilePath}/${resFileName}`;
+        newUrlsLog(newUrl);
         $(el).attr(tag.attr, newUrl);
       }
     });
@@ -53,6 +59,7 @@ const getResource = (address, resUrl, output) => {
     })
     .then(res => fs.writeFile(filePath, res.data, 'utf8'))
     .then(() => {
+      loadLog(`File loaded: ${filePath}`);
       console.log(`Resource successfully downloaded: ${filePath}`);
       return filePath;
     })
@@ -76,6 +83,7 @@ export default (address, output) => {
     .then(data => parseHtml(data, address))
     .then((parsedObj) => {
       parsedData = parsedObj;
+      parsedUrlsLog(parsedObj.urls);
       return fs.writeFile(filePath, parsedObj.newHtml);
     })
     .then(() => fs.mkdir(resFilesPath))
