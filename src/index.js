@@ -68,6 +68,7 @@ const makeError = (err, output, address) => {
     const message = `Error '${code}'. Check the path and permissions for '${errPath}'`;
     throw new Error(message);
   }
+  console.error(err);
   return Promise.reject(err);
 };
 

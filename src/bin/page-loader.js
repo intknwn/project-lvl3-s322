@@ -15,6 +15,7 @@ program
         process.exit();
       })
       .catch(() => {
+        console.error('Something went wrong...');
         process.exit(1);
       });
   });
