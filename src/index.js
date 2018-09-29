@@ -1,9 +1,11 @@
 import fs from 'mz/fs';
 import url from 'url';
 import path from 'path';
+import Listr from 'listr';
 import debug from 'debug';
 import cheerio from 'cheerio';
 import axios from './lib/axios';
+import makeError from './lib/errors';
 
 const loadLog = debug('page-loader:load');
 const parsedUrlsLog = debug('page-loader:parse');
@@ -48,38 +50,12 @@ const parseHtml = (data, address) => {
   return { urls, newHtml: $.html() };
 };
 
-const makeError = (err, output, address) => {
-  const { config, code, path: errPath } = err;
-  if (config) {
-    const message = `Error ${code || err.response.status}. Resource '${address}' can not be accessed.`;
-    throw new Error(message);
-  }
-  if (code === 'ENOENT') {
-    const message = `Oops! Output directory '${output}' does not exist. Please, create it first and try again.`;
-    console.error(message);
-    throw new Error(message);
-  }
-  if (code === 'EEXIST') {
-    const message = `Oops! File '${errPath}' already exists.`;
-    console.error(message);
-    throw new Error(message);
-  }
-  if (errPath) {
-    const message = `Error '${code}'. Check the path and permissions for '${errPath}'`;
-    throw new Error(message);
-  }
-  console.error(err);
-  return Promise.reject(err);
-};
-
 const getResource = (address, resUrl, output) => {
   const filePath = path.join(output, makePath(resUrl || address));
   return axios.get(address, { responseType: 'arraybuffer' })
     .then(res => fs.writeFile(filePath, res.data, 'utf8'))
     .then(() => {
       loadLog(`File loaded: ${filePath}`);
-      console.log(`Resource successfully downloaded: ${filePath}`);
-      return filePath;
     });
 };
 
@@ -89,15 +65,42 @@ export default (address, output) => {
   const resFilesPath = path.join(output, makePath(address, '_files'));
   let parsedData;
 
-  return fs.mkdir(resFilesPath)
-    .then(() => getResource(address, '', output))
-    .then(() => fs.readFile(filePath, 'utf8'))
-    .then(data => parseHtml(data, address))
-    .then((parsedObj) => {
-      parsedData = parsedObj;
-      parsedUrlsLog(parsedObj.urls);
-      return fs.writeFile(filePath, parsedObj.newHtml);
-    })
-    .then(() => Promise.all(parsedData.urls.map(urlStr => getResource(`${address}/${urlStr}`, urlStr, resFilesPath))))
-    .catch(err => makeError(err, output, address));
+  const tasks = new Listr([
+    {
+      title: 'Creating resourses directory',
+      task: () => fs.mkdir(resFilesPath)
+        .catch(err => Promise.reject(makeError(err, output, address))),
+    },
+    {
+      title: 'Saving page',
+      task: () => getResource(address, '', output)
+        .catch(err => Promise.reject(makeError(err, output, address))),
+    },
+    {
+      title: 'Parsing file',
+      task: () => fs.readFile(filePath, 'utf8')
+        .then(data => parseHtml(data, address))
+        .then((parsedObj) => {
+          parsedData = parsedObj;
+          parsedUrlsLog(parsedObj.urls);
+          return fs.writeFile(filePath, parsedObj.newHtml);
+        })
+        .catch(err => Promise.reject(makeError(err, output, address))),
+    },
+    {
+      title: 'Saving resourses',
+      task: () => new Listr(parsedData.urls.map((urlStr) => {
+        const res = `${address}/${urlStr}`;
+        return {
+          title: `  ${res} -> ${resFilesPath}`,
+          task: () => getResource(res, urlStr, resFilesPath)
+            .catch(err => Promise.reject(makeError(err, output, address))),
+        };
+      }), { concurrent: true }),
+    },
+  ]);
+
+  return tasks.run()
+    .catch(err => Promise.reject(err));
+
 };

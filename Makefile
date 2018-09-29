@@ -1,7 +1,7 @@
 install: install-deps install-flow-typed
 
 run:
-	npx babel-node -- src/bin/page-loader.js --output /var/tmp/mam3 http://might-and-magic.com
+	npx babel-node -- src/bin/page-loader.js --output /var/tmp/mam3 http://www.svetmightandmagic.cz
 
 install-deps:
 	npm install

@@ -41,7 +41,7 @@ describe('page-loader', () => {
   });
 
   it('incorrect url', async () => {
-    const expectedErr = new Error('Error 404. Resource \'http://hexlet.io/wrong\' can not be accessed.');
+    const expectedErr = new Error('HTTP 404. Resource \'http://hexlet.io/wrong\' can not be found. Check the correctness of URL.');
     await expect(loadPage(wrongUrl, output)).rejects.toEqual(expectedErr);
   });
 

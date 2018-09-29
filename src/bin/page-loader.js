@@ -11,11 +11,11 @@ program
   .action((address) => {
     loadPage(address, program.output)
       .then(() => {
-        console.log(`Page '${address}' and resourses loaded successfully to '${program.output}'.`);
+        console.log('\x1b[32m', `Page '${address}' and resourses have been loaded successfully to '${program.output}'.`);
         process.exit();
       })
       .catch(() => {
-        console.error('Something went wrong...');
+        console.error('\x1b[31m', 'Something went wrong. Exiting...');
         process.exit(1);
       });
   });
