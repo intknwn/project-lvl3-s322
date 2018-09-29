@@ -6,10 +6,17 @@ import loadPage from '..';
 program
   .version('1.0.0')
   .arguments('<address>')
-  .description('Downloads a web page to the specified directory.')
+  .description('Downloads a web page with resourses to the specified directory.')
   .option('-o, --output [dir]', 'output directory')
   .action((address) => {
-    console.log(loadPage(address, program.output));
+    loadPage(address, program.output)
+      .then(() => {
+        console.log(`Page '${address}' and resourses loaded successfully to '${program.output}'.`);
+        process.exit();
+      })
+      .catch(() => {
+        process.exit(1);
+      });
   });
 
 program.parse(process.argv);

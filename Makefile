@@ -16,6 +16,9 @@ build:
 test:
 	npm test
 
+testwatch:
+	npm run testwatch
+
 check-types:
 	npx flow
 

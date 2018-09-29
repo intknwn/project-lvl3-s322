@@ -3,8 +3,7 @@ import fs from 'mz/fs';
 import nock from 'nock';
 import path from 'path';
 import { promises as fsp } from 'fs';
-import loadPage from '../src/';
-
+import loadPage, { makePath } from '../src/';
 
 const host = 'http://hexlet.io';
 const tmpDir = `${os.tmpdir()}${path.sep}`;
@@ -41,24 +40,29 @@ describe('page-loader', () => {
       .reply(404);
   });
 
-  it('non-existent page', async () => {
-    try {
-      await loadPage(wrongUrl, output);
-    } catch (err) {
-      expect(err.code).toBe(404);
-    }
+  it('incorrect url', async () => {
+    const expectedErr = new Error('Error 404. Resource \'http://hexlet.io/wrong\' can not be accessed.');
+    await expect(loadPage(wrongUrl, output)).rejects.toEqual(expectedErr);
   });
 
   it('non-existent output directory', async () => {
-    try {
-      await loadPage(pageUrl, 'notexist');
-    } catch (err) {
-      expect(err.code).toBe('ENOENT');
-    }
+    const dir = 'notexist';
+    const expectedErr = new Error(`Oops! Output directory '${dir}' does not exist. Please, create it first and try again.`);
+
+    await expect(loadPage(pageUrl, dir)).rejects.toEqual(expectedErr);
   });
 
+  it('file in output directory already exists', async () => {
+    const srcDir = path.resolve(output, makePath(pageUrl, '_files'));
+    await fs.mkdir(srcDir);
+    const expectedErr = new Error(`Oops! File '${srcDir}' already exists.`);
+    await expect(loadPage(pageUrl, output)).rejects.toEqual(expectedErr);
+  });
+
+
   it('downloading page and resources', async () => {
-    const fileName = await loadPage(pageUrl, output);
+    await loadPage(pageUrl, output);
+    const fileName = makePath(pageUrl);
     expect(fileName).toBe('hexlet-io-courses.html');
     const fileExists = await fs.exists(path.resolve(output, fileName));
     expect(fileExists).toBe(true);
