@@ -102,5 +102,4 @@ export default (address, output) => {
 
   return tasks.run()
     .catch(err => Promise.reject(err));
-
 };
