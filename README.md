@@ -25,4 +25,4 @@ Utility for downloading web pages to the specified directory.
 
 ### Asciinema
 
-See it in action: [https://asciinema.org/a/rz4n7dZWxufBsIbHmg5MnYy0G](https://asciinema.org/a/rz4n7dZWxufBsIbHmg5MnYy0G)
+See it in action: [https://asciinema.org/a/9ilTNzbAK7tbvz5XqobHQgFkL](https://asciinema.org/a/9ilTNzbAK7tbvz5XqobHQgFkL)
