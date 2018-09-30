@@ -92,14 +92,14 @@ export default (address, output) => {
     },
     {
       title: 'Saving resourses',
-      task: ctx => new Listr(ctx.parsed.urls.map((urlStr) => {
+      task: ctx => new Listr(Promise.all(ctx.parsed.urls.map((urlStr) => {
         const res = `${address}/${urlStr}`;
         return {
           title: `  ${res} -> ${resFilesPath}`,
           task: () => getResource(res, urlStr, resFilesPath)
             .catch(err => Promise.reject(makeError(err, output, address))),
         };
-      }), { concurrent: true }),
+      }), { concurrent: true })),
     },
   ]);
 
