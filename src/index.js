@@ -16,7 +16,7 @@ export const makePath = (address, fileExt = '') => {
   const { host, pathname } = url.parse(addr, true);
   const trueExt = path.extname(pathname);
   const { ext, dir, name } = path.parse([host, pathname].join(''));
-  const base = (path.join(dir, name, !trueExt ? ext.slice(1) : '')).replace(/[^a-z0-9]/gi, '-');
+  const base = (path.join(dir, name, !trueExt ? ext.slice(1) : '')).replace(/\W+/gi, '-');
   return `${base}${fileExt || trueExt || '.html'}`;
 };
 
@@ -68,16 +68,13 @@ export default (address, output) => {
   const tasks = new Listr([
     {
       title: 'Creating resourses directory',
-      task: () => {
-        console.log('fire!');
-        return fs.mkdir(resFilesPath)
-          .catch(err => Promise.reject(makeError(err, output, address)));
-      },
+      task: () => fs.mkdir(resFilesPath)
+        .catch(err => makeError(err, output, address)),
     },
     {
       title: 'Saving page',
       task: () => getResource(address, '', output)
-        .catch(err => Promise.reject(makeError(err, output, address))),
+        .catch(err => makeError(err, output, address)),
     },
     {
       title: 'Parsing file',
@@ -88,7 +85,7 @@ export default (address, output) => {
           parsedUrlsLog(parsedObj.urls);
           return fs.writeFile(filePath, parsedObj.newHtml);
         })
-        .catch(err => Promise.reject(makeError(err, output, address))),
+        .catch(err => makeError(err, output, address)),
     },
     {
       title: 'Saving resourses',
@@ -97,12 +94,11 @@ export default (address, output) => {
         return {
           title: `  ${res} -> ${resFilesPath}`,
           task: () => getResource(res, urlStr, resFilesPath)
-            .catch(err => Promise.reject(makeError(err, output, address))),
+            .catch(err => makeError(err, output, address)),
         };
       }), { concurrent: true }),
     },
   ]);
 
-  return tasks.run()
-    .catch(err => Promise.reject(err));
+  return tasks.run();
 };

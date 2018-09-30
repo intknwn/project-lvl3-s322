@@ -11,18 +11,18 @@ export default (err, output, address) => {
   const errMsg = messages[errCode];
 
   if (errMsg) {
-    return new Error(errMsg);
+    return Promise.reject(new Error(errMsg));
   }
 
   if (config) {
     const message = `Error ${errCode}. Resource '${address}' can not be accessed.`;
-    return new Error(message);
+    return Promise.reject(new Error(message));
   }
 
   if (errPath) {
     const message = `Error '${errCode}'. Check the path and permissions for '${errPath}'`;
-    return new Error(message);
+    return Promise.reject(new Error(message));
   }
 
-  return new Error('Unknown error');
+  return Promise.reject(new Error('Unknown error'));
 };
