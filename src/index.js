@@ -71,7 +71,7 @@ export default (address, output) => {
       task: () => {
         console.log('fire!');
         return fs.mkdir(resFilesPath)
-          .catch(err => Promise.reject(makeError(err, output, address))) 
+          .catch(err => Promise.reject(makeError(err, output, address)));
       },
     },
     {
