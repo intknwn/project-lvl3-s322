@@ -14,9 +14,10 @@ const newUrlsLog = debug('page-loader:makeurl');
 export const makePath = (address, fileExt = '') => {
   const addr = address[0] === '/' ? address.slice(1) : address;
   const { host, pathname } = url.parse(addr, true);
+  const trueExt = path.extname(pathname);
   const { ext, dir, name } = path.parse([host, pathname].join(''));
-  const base = (path.join(dir, name)).replace(/[^a-z0-9]/gi, '-');
-  return `${base}${fileExt || ext || '.html'}`;
+  const base = (path.join(dir, name, !trueExt ? ext.slice(1) : '')).replace(/[^a-z0-9]/gi, '-');
+  return `${base}${fileExt || trueExt || '.html'}`;
 };
 
 const parseHtml = (data, address) => {

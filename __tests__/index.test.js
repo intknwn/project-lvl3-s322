@@ -18,6 +18,32 @@ const resources = [
   'css-main.css',
 ];
 
+describe('makePath', () => {
+  it('https://ru.hexlet.io', () => {
+    expect(makePath('https://ru.hexlet.io')).toBe('ru-hexlet-io.html');
+  });
+
+  it('https://ru.hexlet.io/courses', () => {
+    expect(makePath('https://ru.hexlet.io/courses')).toBe('ru-hexlet-io-courses.html');
+  });
+
+  it('https://ru.hexlet.io/courses.php', () => {
+    expect(makePath('https://ru.hexlet.io/courses.php')).toBe('ru-hexlet-io-courses.php');
+  });
+
+  it('/source/css/main.css', () => {
+    expect(makePath('/source/css/main.css')).toBe('source-css-main.css');
+  });
+
+  it('https://ru.hexlet.io/courses (res directory)', () => {
+    expect(makePath('https://ru.hexlet.io/courses', '_files')).toBe('ru-hexlet-io-courses_files');
+  });
+
+  it('https://ru.hexlet.io/courses.html (res directory)', () => {
+    expect(makePath('https://ru.hexlet.io/courses.html', '_files')).toBe('ru-hexlet-io-courses_files');
+  });
+});
+
 describe('page-loader', () => {
   let output;
   const fileData = fs.readFileSync(filePath, 'utf8');
