@@ -64,13 +64,15 @@ export default (address, output) => {
   const fileName = makePath(address);
   const filePath = path.join(output, fileName);
   const resFilesPath = path.join(output, makePath(address, '_files'));
-  let parsedData;
 
   const tasks = new Listr([
     {
       title: 'Creating resourses directory',
-      task: () => fs.mkdir(resFilesPath)
-        .catch(err => Promise.reject(makeError(err, output, address))),
+      task: () => {
+        console.log('fire!');
+        return fs.mkdir(resFilesPath)
+          .catch(err => Promise.reject(makeError(err, output, address))) 
+      },
     },
     {
       title: 'Saving page',
@@ -79,10 +81,10 @@ export default (address, output) => {
     },
     {
       title: 'Parsing file',
-      task: () => fs.readFile(filePath, 'utf8')
+      task: ctx => fs.readFile(filePath, 'utf8')
         .then(data => parseHtml(data, address))
         .then((parsedObj) => {
-          parsedData = parsedObj;
+          ctx.parsed = parsedObj;
           parsedUrlsLog(parsedObj.urls);
           return fs.writeFile(filePath, parsedObj.newHtml);
         })
@@ -90,7 +92,7 @@ export default (address, output) => {
     },
     {
       title: 'Saving resourses',
-      task: () => new Listr(parsedData.urls.map((urlStr) => {
+      task: ctx => new Listr(ctx.parsed.urls.map((urlStr) => {
         const res = `${address}/${urlStr}`;
         return {
           title: `  ${res} -> ${resFilesPath}`,
